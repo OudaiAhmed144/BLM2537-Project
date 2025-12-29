@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home</title>
+    <script src="js/jquery-3.7.1.js"></script>
+    <script type="text/javascript" src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+    <link rel="stylesheet" href="nhomestyles.css">
+    <script src="nhomejs.js"></script>
+</head>
+<body>
+    
+    <div class="popup-container">
+    <div class="popup-window">
+            <h2 id="pop-header">Add New Expense</h2>
+            
+            <form id="expenseForm">
+                
+                <input type="date" id="date" name="date" required placeholder="date: yyyy/mm/dd">
+                
+                
+                <input type="text" id="name" name="name" required placeholder="name"><br><br>
+                
+                
+                <input type="text" id="description" name="description" placeholder="description"><br><br>
+                
+                
+                <input type="text" id="category" name="category" required placeholder="category">
+                
+                
+                <input type="float" id="amount" name="amount" required placeholder="amount"><br><br>
+                <select id="profiles-popup" name="profile">
+                    <option value="default">Default Profile</option>
+                    <option value="profile1">Profile 1</option>
+                    <option value="profile2">Profile 2</option>
+                    <option value="profile3">Profile 3</option>
+                </select>
+                <button type="button" id="popup-cancel-button">Cancel</button>
+                <button type="submit" id="popup-add-button">Add Expense</button>
+            </form>
+        </div>
+        </div>
+     <div class="addprofilepopupcontainer">
+        <div class="addprofilepopup">
+            <h2 id="add-profile-header">Add New Profile</h2>
+            <form id="profileForm">
+                <input type="text" id="profilename" name="profilename" required placeholder="Profile Name"><br><br>
+                <button type="button" id="add-profile-cancel-button">Cancel</button>
+                <button type="submit" id="add-profile-add-button">Add Profile</button>
+            </form>
+        </div>
+     </div>
+     <div class="delete-popup-container">
+        <div class="delete-popup">
+            <img src="red-cropped-warning.png" alt="Warning" class="warning-icon">
+            <h2 id="delete-item-header">The Item Will be Permamently Deleted!</h2>
+            <form id="deleteForm">
+                <button type="button" id="delete-cancel-button">Cancel</button>
+                <button type="submit" id="delete-confirm-button">Delete</button>
+            </form>
+        </div>
+     </div>      
+     <nav class="profiles">
+        <ul id="profiles-menu">
+            <h1>Profiles</h1>
+            
+        </ul>
+        <button id="add-profile-button">Add Profile</button>
+    </nav>
+    <nav class="navbar"> 
+        <ul class="navbar-menu">                                                                    
+            <li class="navbar-item"> 
+                <div class="home">
+                     <a href="nhome.html" class="navbar-link">
+                        <img src="homev3.png" width="30px"></a> 
+                        <a href="nhome.html" class="navbar-link">Home</a> 
+                    </div> 
+                </li> 
+            
+                 <li class="navbar-item"> 
+                    <div class="analyze"> 
+                        <a href="nanalyze.html" class="navbar-link">
+                            <img src="piecharticonv2.png" width="30px"></a> 
+                            <a href="nanalyze.html" class="navbar-link">Analyze</a> 
+                        </div> 
+                    </li>
+                    <li class="navbar-item"> 
+                <div class="profilemaneg"> 
+                    <a href="profilemaneg.html" class="navbar-link">
+                        <img src="usericonv2.png" width="30px"></a> 
+                        <a href="profilemaneg.html" class="navbar-link">Manage Profiles</a> 
+                    </div>
+                </li>
+                    <li class="navbar-item"> 
+                    <div class="analyze"> 
+                        <a href="contact.html" class="navbar-link">
+                            <img src="contact.png" width="30px"></a> 
+                            <a href="contact.html" class="navbar-link">Contact</a> 
+                        </div> 
+                    </li>
+                     <button id="add-expense-button">Add New Expense</button> 
+                    </ul>
+                 </nav>
+    <script>
+            
+            document.getElementById("add-profile-cancel-button").addEventListener("click", function() {
+            document.querySelector(".addprofilepopupcontainer").style.display = "none";
+                                });
+            document.getElementById("add-profile-add-button").addEventListener("click", function() {
+                if(Profiles.length >= 10){
+                    alert("Maximum number of profiles reached (10). Cannot add more profiles.");
+                    return;
+                }
+                else{
+                    const inputprofilename = document.getElementById("profilename");
+                    let today = Date.now();
+                    Profiles.push({'name': inputprofilename.value, 'lastupdate': today});
+                    localStorage.setItem("proofiles", JSON.stringify(Profiles));
+                    generateProfiles(Profiles);
+                }
+            document.querySelector(".addprofilepopupcontainer").style.display = "none";
+            
+            inputprofilename.value = "";
+                                });
+            document.getElementById("add-profile-button").addEventListener("click", function() {
+            document.querySelector(".addprofilepopupcontainer").style.display = "flex";
+                                });
+
+            document.getElementById("popup-cancel-button").addEventListener("click", function() {
+            document.querySelector(".popup-container").style.display = "none";
+            inputname.value = "";
+            inputamount.value = "";
+            inputdate.value = "";
+            inputcategory.value = "";
+            inputdescription.value = "";
+                                });
+            document.getElementById("add-expense-button").addEventListener("click", function() {
+            document.querySelector(".popup-container").style.display = "flex";
+            console.log("Add Expense button clicked");
+                                });
+            document.getElementById("popup-add-button").addEventListener("click", function() {
+            document.querySelector(".popup-container").style.display = "none";
+                                });
+
+        const inputname = document.getElementById("name");
+        const inputamount = document.getElementById("amount");
+        const inputdate = document.getElementById("date");
+        const inputcategory = document.getElementById("category");
+        const inputdescription = document.getElementById("description");
+        const inputprofile = document.getElementById("profiles-popup");
+        document.getElementById("expenseForm").addEventListener("submit", function(event) {
+            event.preventDefault();
+            const name = inputname.value;
+            const amount = parseFloat(inputamount.value);
+            const date = inputdate.value;
+            const category = inputcategory.value;
+            const description = inputdescription.value;
+            const profile = inputprofile.value;
+            const newExpense = {
+                date: date,
+                name: name,
+                description: description,
+                category: category,
+                amount: amount,
+                profile: profile,
+                id: Date.now()
+            };
+            arrofobj = JSON.parse(localStorage.getItem(profile));
+            if (arrofobj == null) {
+                arrofobj = [];
+            }
+            arrofobj.push(newExpense);
+            localStorage.setItem(profile, JSON.stringify(arrofobj));
+            for(let i=0; i<Profiles.length; i++){
+                if(Profiles[i].name === profile){
+                    let today = Date.now();
+                    Profiles[i].lastupdate = today;
+                    localStorage.setItem("proofiles", JSON.stringify(Profiles));
+                    break;
+                }
+            }
+            console.log("New Expense Added:", newExpense);
+            document.querySelector(".popup-container").style.display = "none";
+            inputname.value = "";
+            inputamount.value = "";
+            inputdate.value = "";
+            inputcategory.value = "";
+            inputdescription.value = "";
+            generateTable(getallitemstobeshown(getprofilestobeshown()));
+            });
+            document.addEventListener('click', function(event) {
+            if (event.target && event.target.classList.contains('profilecheckbox')) {
+                localStorage.setItem("selectedProfiles", JSON.stringify(getprofilestobeshown()));
+                console.log("Selected Profiles to save:", getprofilestobeshown());
+                generateTable(getallitemstobeshown(getprofilestobeshown()));
+            }
+            });
+            generateProfiles(Profiles);
+
+        </script>
+
+
+    <main>
+        <div class="abovetable">
+        <h1>Expenses Table</h1>
+        <div id="sheets-buttons-container">
+            
+            <img class="export-icon" src="folder.png" alt="Export"> <span id="exportheader">Export As xlsx File</span>
+        </div>
+        </div>
+        <div class="container">
+            <table class="overview-table">
+                <thead>
+                    <tr >
+                        <th class="w10" data-column="Date" data-order="desc">Date</th>
+                        <th data-column="Name" data-order="desc">Name</th>
+                        <th data-column="Discription" data-order="desc">Discription</th>
+                        <th data-column="Category" data-order="desc">Category</th>
+                        <th class="w15" data-column="Amount" data-order="desc">Amount</th>
+                        <th class="w8"></th>
+                    </tr>
+                </thead>
+                <tbody id="expenseTable">
+                    
+                </tbody>
+        </div>
+        
+    </main>
+    <script>
+        generateTable(getallitemstobeshown(getprofilestobeshown()));
+        console.log("1st generate table called");
+        document.addEventListener('click', function(event) {
+            if (event.target && event.target.classList.contains('delete-button-selector')) {
+                    document.querySelector(".delete-popup-container").style.display = "flex";
+                document.getElementById("delete-confirm-button").addEventListener("click", function() {
+                    document.querySelector(".delete-popup-container").style.display = "none";
+                    const expenseId = parseInt(event.target.getAttribute('data-expense-id'));
+                    deleteexpensebyid(expenseId);
+                                });                
+                document.getElementById("delete-cancel-button").addEventListener("click", function() {
+                    document.querySelector(".delete-popup-container").style.display = "none";
+                });
+                generateTable(getallitemstobeshown(getprofilestobeshown()));
+                console.log("2 generate table called");
+            }
+            else if(event.target && event.target.classList.contains('trash-icon')) {
+                    document.querySelector(".delete-popup-container").style.display = "flex";
+                document.getElementById("delete-confirm-button").addEventListener("click", function() {
+                    document.querySelector(".delete-popup-container").style.display = "none";
+                    const expenseId = parseInt(event.target.parentElement.getAttribute('data-expense-id'));
+                    deleteexpensebyid(expenseId);
+                                });                
+                document.getElementById("delete-cancel-button").addEventListener("click", function() {
+                    document.querySelector(".delete-popup-container").style.display = "none";
+                });
+                generateTable(getallitemstobeshown(getprofilestobeshown()));
+                console.log("2 generate table called");
+            }
+            else if(event.target && event.target.classList.contains('edit-button-selector')) {
+                    const expenseId = parseInt(event.target.getAttribute('data-expense-id'));
+                    item = getitembyid(expenseId);
+                    inputname.value = item.name;
+                    inputamount.value = item.amount;
+                    inputdate.value = item.date;
+                    inputcategory.value = item.category;
+                    inputdescription.value = item.description;
+                    inputprofile.value = item.profile;
+                    document.querySelector(".popup-container").style.display = "flex";
+                    document.getElementById("popup-add-button").addEventListener("click", function(){
+                        deleteexpensebyid(expenseId)
+                    });
+            }
+            else if(event.target && event.target.classList.contains('edit-icon')) {
+                    const expenseId = parseInt(event.target.getAttribute('data-expense-id'));
+                    item = getitembyid(expenseId);
+                    inputname.value = item.name;
+                    inputamount.value = item.amount;
+                    inputdate.value = item.date;
+                    inputcategory.value = item.category;
+                    inputdescription.value = item.description;
+                    inputprofile.value = item.profile;
+                    document.querySelector(".popup-container").style.display = "flex";
+                    document.getElementById("popup-add-button").addEventListener("click", function(){
+                        deleteexpensebyid(expenseId)
+                    });
+            }
+            
+        });
+        $('th').on('click', function() {
+            var col = $(this).data('column');
+            var order = $(this).data('order');
+            console.log('Header clicked:', col, order);
+            ordered = getallitemstobeshown(getprofilestobeshown());
+            if(order == 'desc'){
+                $(this).data('order', "asc");
+                ordered = ordered.sort((a,b) => a[col.toLowerCase()] > b[col.toLowerCase()] ? 1 : -1);
+                console.log("order changed to asc");
+            }else{
+                $(this).data('order', "desc");
+                ordered = ordered.sort((a,b) => a[col.toLowerCase()] < b[col.toLowerCase()] ? 1 : -1);
+                console.log("order changed to desc");
+            }
+            generateTable(ordered);
+            console.log("3 generate table called");
+        
+        });
+        document.getElementById("sheets-buttons-container").addEventListener("click", function() {
+            console.log("button clicked!");
+            var cleanData = getallitemstobeshown(getprofilestobeshown()).map(function(item) {
+            var { id, ...rest } = item;
+            return rest;
+            });
+            var ws = XLSX.utils.json_to_sheet(cleanData);
+            var wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
+            XLSX.writeFile(wb, "Expenses.xlsx");
+            console.log("Exported Profiles Data:", cleanData);
+        });
+    </script>
+
+</body>
+</html>
